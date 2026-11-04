@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17151f">
+<title>Personal OS — Productivity & Knowledge System</title>
+<style>
+:root{
+  --bg:#f7f5f1; --surface:#fffdf9; --surface-2:#f1eee8; --surface-3:#ebe7df;
+  --text:#25222b; --muted:#77727d; --border:#ded9d0;
+  --primary:#6d3df5; --primary-2:#8b67ff; --primary-soft:#eee8ff;
+  --success:#169b68; --success-soft:#e4f7ee;
+  --warning:#d99012; --warning-soft:#fff2d6;
+  --danger:#e94b73; --danger-soft:#ffe8ee;
+  --info:#178a9d; --info-soft:#e4f6f8;
+  --shadow:0 10px 30px rgba(37,34,43,.07);
+  --radius:16px; --radius-sm:11px;
+  --sidebar:248px; --topbar:70px;
+}
+[data-theme="dark"]{
+  --bg:#141218; --surface:#1c1922; --surface-2:#25212c; --surface-3:#302b38;
+  --text:#f7f3fb; --muted:#a9a2b2; --border:#3a3444;
+  --primary:#9a79ff; --primary-2:#b39aff; --primary-soft:#30274c;
+  --success:#43c994; --success-soft:#18392e; --warning:#f1b33d; --warning-soft:#403318;
+  --danger:#ff6b91; --danger-soft:#411e2b; --info:#55c1d0; --info-soft:#18363b;
+  --shadow:0 12px 35px rgba(0,0,0,.22);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);padding:18px 14px;z-index:30;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;padding:7px 10px 22px}
+.brand-mark{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--primary),#f34c91);display:grid;place-items:center;color:#fff;font-weight:900}
+.brand-title{font-weight:800;font-size:15px}.brand-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.nav-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:13px 11px 7px}
+.nav{display:grid;gap:4px}
+.nav button{border:0;background:transparent;padding:10px 11px;border-radius:11px;text-align:left;display:flex;align-items:center;gap:11px;color:var(--muted);transition:.15s}
+.nav button:hover{background:var(--surface-2);color:var(--text)}
+.nav button.active{background:var(--primary-soft);color:var(--primary);font-weight:750}
+.nav-icon{width:18px;text-align:center}
+.sidebar-bottom{margin-top:auto;border-top:1px solid var(--border);padding-top:12px}
+.main{margin-left:var(--sidebar);width:calc(100% - var(--sidebar))}
+.topbar{height:var(--topbar);position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.search{width:min(390px,42vw);background:var(--surface);border:1px solid var(--border);border-radius:12px;height:40px;display:flex;align-items:center;gap:9px;padding:0 12px;color:var(--muted)}
+.search input{border:0;outline:0;background:transparent;width:100%}
+.top-actions{display:flex;gap:8px;align-items:center}
+.icon-btn,.avatar-btn{border:1px solid var(--border);background:var(--surface);height:38px;min-width:38px;border-radius:11px;display:grid;place-items:center}
+.avatar-btn{border-radius:50%;background:var(--primary-soft);color:var(--primary);font-weight:800}
+.content{padding:28px;max-width:1600px;margin:auto}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+.page-head h1{margin:0;font-size:26px;letter-spacing:-.03em}.page-head p{margin:6px 0 0;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--border);background:var(--surface);padding:9px 13px;border-radius:11px;font-weight:700}
+.btn:hover{background:var(--surface-2)}.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.grid{display:grid;gap:16px}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card.pad{padding:18px}
+.stat{padding:18px;position:relative;overflow:hidden}.stat .label{color:var(--muted);font-size:12px}.stat .value{font-size:27px;font-weight:850;margin-top:7px}.stat .delta{font-size:11px;margin-top:5px;color:var(--success)}.stat .dot{position:absolute;right:17px;top:18px;width:10px;height:10px;border-radius:50%}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.section-title h3{margin:0;font-size:15px}.muted{color:var(--muted)}
+.task-list{display:grid}.task-row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:13px 4px;border-bottom:1px solid var(--border)}.task-row:last-child{border-bottom:0}
+.check{width:19px;height:19px;border:2px solid var(--border);border-radius:6px;background:transparent}.check.done{background:var(--success);border-color:var(--success);color:#fff;display:grid;place-items:center;font-size:12px}
+.task-title{font-weight:700}.task-meta{font-size:11px;color:var(--muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800}.badge.urgent{background:var(--danger-soft);color:var(--danger)}.badge.high{background:#fff0df;color:#b96a00}.badge.medium{background:var(--warning-soft);color:#9b6a0b}.badge.low{background:var(--success-soft);color:var(--success)}
+.badge.active{background:var(--success-soft);color:var(--success)}.badge.paused{background:var(--warning-soft);color:var(--warning)}.badge.inactive{background:var(--surface-2);color:var(--muted)}
+.timer{display:flex;align-items:center;gap:15px}.timer-ring{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--primary) 70%,var(--surface-3) 0);position:relative}.timer-ring:after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--surface)}.timer-ring span{position:relative;z-index:1;font-weight:850;font-size:15px}
+.progress{height:7px;background:var(--surface-3);border-radius:20px;overflow:hidden}.progress i{display:block;height:100%;background:var(--primary);border-radius:inherit}
+.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.quick button{padding:13px 8px;border:1px solid var(--border);background:var(--surface);border-radius:12px;font-weight:750}.quick button:hover{border-color:var(--primary);color:var(--primary)}
+.calendar{padding:14px}.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cal-cell{min-height:74px;border:1px solid var(--border);border-radius:9px;padding:6px;background:var(--surface)}.cal-cell .num{font-size:11px;color:var(--muted)}.event{margin-top:5px;padding:4px 5px;border-radius:6px;font-size:9px;background:var(--primary-soft);color:var(--primary);white-space:nowrap;overflow:hidden}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--border);white-space:nowrap}.table th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.table td{font-size:13px}
+.avatar{width:35px;height:35px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-weight:800}
+.person{display:flex;align-items:center;gap:10px}.person strong{display:block}.person small{color:var(--muted)}
+.profile{display:grid;grid-template-columns:260px 1fr;gap:16px}.profile-side{text-align:center;padding:24px}.big-avatar{width:86px;height:86px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-size:25px;font-weight:850;margin:0 auto 13px}
+.tabs{display:flex;gap:3px;border-bottom:1px solid var(--border);margin-bottom:16px}.tab{border:0;background:transparent;padding:11px 13px;color:var(--muted);font-weight:700}.tab.active{color:var(--primary);border-bottom:2px solid var(--primary)}
+.course{padding:16px}.course-icon{width:40px;height:40px;border-radius:12px;background:#fff0df;color:#b96a00;display:grid;place-items:center;font-weight:900}.course-head{display:flex;gap:11px}.course h4{margin:0 0 5px}.course small{color:var(--muted)}
+.knowledge{padding:16px}.note-icon{width:34px;height:34px;border-radius:10px;background:var(--info-soft);color:var(--info);display:grid;place-items:center}
+.file{padding:15px}.file-icon{width:44px;height:44px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;font-weight:850}.file-row{display:flex;gap:11px;align-items:center}
+.folder{padding:15px;display:flex;align-items:center;gap:12px}.folder-icon{font-size:26px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:750}.field input,.field textarea,.field select{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:10px 11px;outline:none}.field textarea{min-height:105px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:80;display:none;align-items:center;justify-content:center;padding:20px}.overlay.open{display:flex}.modal{width:min(650px,100%);max-height:90vh;overflow:auto;background:var(--surface);border-radius:20px;border:1px solid var(--border);box-shadow:0 30px 80px rgba(0,0,0,.25)}.modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}.modal-body{padding:20px}.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.toast{position:fixed;right:22px;bottom:22px;z-index:100;background:var(--text);color:var(--bg);padding:12px 15px;border-radius:11px;box-shadow:var(--shadow);display:none}.toast.show{display:block}
+.empty{text-align:center;padding:45px 20px;color:var(--muted)}.empty .empty-icon{font-size:34px;margin-bottom:10px}.empty h3{color:var(--text);margin:0 0 5px}
+.timeline{position:relative;padding-left:24px}.timeline:before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--border)}.timeline-item{position:relative;padding:0 0 18px}.timeline-item:before{content:"";position:absolute;left:-22px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--primary);border:3px solid var(--surface)}.timeline-item strong{display:block}.timeline-item small{color:var(--muted)}
+.notice{padding:12px 14px;border-radius:11px;background:var(--info-soft);color:var(--info);font-size:12px}
+.switch{width:43px;height:24px;border-radius:99px;background:var(--surface-3);padding:3px;border:0}.switch i{display:block;width:18px;height:18px;background:var(--surface);border-radius:50%;transition:.2s}.switch.on{background:var(--primary)}.switch.on i{transform:translateX(19px)}
+.responsive-only{display:none}
+@media(max-width:1050px){.grid-4{grid-template-columns:repeat(2,1fr)}.profile{grid-template-columns:1fr}.quick{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){
+  :root{--sidebar:0px}
+  .sidebar{transform:translateX(-100%);width:250px;box-shadow:var(--shadow)}.sidebar.mobile-open{transform:translateX(0)}
+  .main{margin-left:0;width:100%}.topbar{padding:0 14px}.search{width:46px}.search input{display:none}.content{padding:18px 14px}.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}.quick{grid-template-columns:repeat(2,1fr)}.responsive-only{display:grid}.mobile-menu{display:grid!important}
+  .page-head{flex-direction:column}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
+}
+.mobile-menu{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="brand-mark">P</div><div><div class="brand-title">Personal OS</div><div class="brand-sub">Productivity & Knowledge</div></div></div>
+  <div class="nav-label">Command</div>
+  <nav class="nav">
+    <button data-page="dashboard" class="active"><span class="nav-icon">⌂</span>Dashboard</button>
+    <button data-page="tasks"><span class="nav-icon">✓</span>Tasks</button>
+    <button data-page="calendar"><span class="nav-icon">▦</span>Calendar</button>
+  </nav>
+  <div class="nav-label">Workspace</div>
+  <nav class="nav">
+    <button data-page="clients"><span class="nav-icon">◉</span>Clients</button>
+    <button data-page="learning"><span class="nav-icon">◈</span>Learning</button>
+    <button data-page="knowledge"><span class="nav-icon">✦</span>Knowledge</button>
+    <button data-page="files"><span class="nav-icon">□</span>Files</button>
+  </nav>
+  <div class="nav-label">System</div>
+  <nav class="nav">
+    <button data-page="notifications"><span class="nav-icon">♢</span>Notifications</button>
+    <button data-page="activity"><span class="nav-icon">◌</span>Activity</button>
+    <button data-page="trash"><span class="nav-icon">⌫</span>Trash</button>
+    <button data-page="settings"><span class="nav-icon">⚙</span>Settings</button>
+  </nav>
+  <div class="sidebar-bottom">
+    <button class="nav" style="width:100%;border:0;background:transparent" onclick="toggleTheme()"><span style="padding:10px 11px;display:flex;gap:11px;color:var(--muted)">◐ <span id="themeLabel">Dark mode</span></span></button>
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="icon-btn mobile-menu" onclick="toggleSidebar()">☰</button>
+    <label class="search"><span>⌕</span><input id="globalSearch" placeholder="Search tasks, clients, knowledge, files..." oninput="globalSearch(this.value)"></label>
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn" onclick="openModal('quickModal')">＋</button>
+    <button class="icon-btn" onclick="showPage('notifications')">♢</button>
+    <button class="avatar-btn">ME</button>
+  </div>
+</header>
+<section class="content" id="appContent"></section>
+</main>
+</div>
+
+<div class="overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBox"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const state={
+  page:"dashboard",
+  theme:localStorage.getItem("pos-theme")||"light",
+  tasks:[
+    {id:1,title:"Prepare client proposal",priority:"High",status:"In Progress",due:"Today · 10:00",client:"Ahmed Tarek",done:false},
+    {id:2,title:"Study marketing course",priority:"Medium",status:"To Do",due:"Today · 14:00",client:"",done:false},
+    {id:3,title:"Clinic meeting",priority:"Low",status:"To Do",due:"Today · 16:00",client:"PetHome Clinic",done:false},
+    {id:4,title:"Design social media post",priority:"High",status:"To Do",due:"Tomorrow · 09:00",client:"PetHome Clinic",done:false},
+    {id:5,title:"Weekly performance report",priority:"Urgent",status:"Done",due:"Sep 26",client:"Ahmed Tarek",done:true}
+  ],
+  clients:[
+    {id:1,name:"Ahmed Tarek",type:"Course Launch",status:"Active",initials:"AT",last:"Today"},
+    {id:2,name:"Sara Mohamed",type:"Social Media",status:"Active",initials:"SM",last:"Yesterday"},
+    {id:3,name:"Nova Agency",type:"Marketing Strategy",status:"Inactive",initials:"NA",last:"Sep 22"},
+    {id:4,name:"PetHome Clinic",type:"Content Creation",status:"Active",initials:"PC",last:"Sep 20"}
+  ],
+  courses:[
+    {id:1,name:"Digital Marketing",progress:60,status:"In Progress",category:"Marketing"},
+    {id:2,name:"Media Buying",progress:40,status:"In Progress",category:"Marketing"},
+    {id:3,name:"Product Management",progress:0,status:"To Learn",category:"Business"}
+  ],
+  knowledge:[
+    {id:1,title:"Facebook Ads Strategy",category:"Marketing",tags:["Facebook","Ads"],date:"Sep 27",pinned:true},
+    {id:2,title:"Creative Testing Framework",category:"Marketing",tags:["Creative","Testing"],date:"Sep 25",pinned:false},
+    {id:3,title:"Client onboarding checklist",category:"Business",tags:["Clients"],date:"Sep 23",pinned:false}
+  ],
+  files:[
+    {id:1,name:"Course Outline.pdf",type:"PDF",size:"1.2 MB",folder:"Courses"},
+    {id:2,name:"Client Proposal.docx",type:"DOCX",size:"840 KB",folder:"Clients"},
+    {id:3,name:"September Report.xlsx",type:"XLSX",size:"2.4 MB",folder:"Documents"},
+    {id:4,name:"Social Media Designs",type:"Folder",size:"25 files",folder:"Designs"}
+  ],
+  notifications:[
+    ["Task due soon","Prepare client proposal is due in 10 minutes.","warning"],
+    ["Recurring task","Weekly review is scheduled for tomorrow.","info"],
+    ["Task completed","Design social media post was completed.","success"]
+  ]
+};
+document.documentElement.dataset.theme=state.theme;
+document.addEventListener("DOMContentLoaded",()=>{render();});
+
+function render(){
+  const c=document.getElementById("appContent");
+  c.innerHTML=pages[state.page]();
+  document.querySelectorAll(".nav button[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===state.page));
+  document.getElementById("themeLabel").textContent=state.theme==="dark"?"Light mode":"Dark mode";
+}
+function showPage(page){state.page=page;render();window.scrollTo(0,0);if(innerWidth<760)document.getElementById("sidebar").classList.remove("mobile-open")}
+function toggleTheme(){state.theme=state.theme==="dark"?"light":"dark";localStorage.setItem("pos-theme",state.theme);document.documentElement.dataset.theme=state.theme;render()}
+function toggleSidebar(){document.getElementById("sidebar").classList.toggle("mobile-open")}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
+function openModal(type){let box=document.getElementById("modalBox");let content="";
+ if(type==="taskModal")content=`<div class="modal-head"><strong>Create Task</strong><button class="icon-btn" onclick="closeModal()">×</button></div><div class="modal-body"><div class="form-grid"><div class="field full"><label>Task name *</label><input id="fTitle" placeholder="e.g. Prepare proposal"></div><div class="field"><label>Priority *</label><select id="fPriority"><option>Urgent</option><option>High</option><option selected>Medium</option><option>Low</option></select></div><div class="field"><label>Status</label><select id="fStatus"><option>To Do</option><option>In Progress</option></select></div><div class="field"><label>Due date</label><input type="date" id="fDate"></div><div class="field"><label>Due time</label><input type="time" id="fTime"></div><div class="field full"><label>Notes</label><textarea id="fNotes" placeholder="Optional notes..."></textarea></div></div></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="createTask()">Create Task</button></div>`;
+ else if(type==="clientModal")content=`<div class="modal-head"><strong>Create Client</strong><button class="icon-btn" onclick="closeModal()">×</button></div><div class="modal-body"><div class="form-grid"><div class="field full"><label>Client name *</label><input id="cName" placeholder="Client name"></div><div class="field"><label>Type of work</label><input id="cType" placeholder="e.g. Course Launch"></div><div class="field"><label>Status</label><select id="cStatus"><option>Upcoming</option><option selected>Active</option><option>Paused</option><option>Inactive</option></select></div><div class="field full"><label>About</label><textarea id="cAbout"></textarea></div></div></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="createClient()">Create Client</button></div>`;
+ else if(type==="courseModal")content=`<div class="modal-head"><strong>Add Course</strong><button class="icon-btn" onclick="closeModal()">×</button></div><div class="modal-body"><div class="form-grid"><div class="field full"><label>Course name *</label><input id="courseName"></div><div class="field"><label>Category</label><input id="courseCat" placeholder="Marketing"></div><div class="field"><label>URL</label><input id="courseUrl" placeholder="https://..."></div></div></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="createCourse()">Add Course</button></div>`;
+ else if(type==="quickModal")content=`<div class="modal-head"><strong>Quick Add</strong><button class="icon-btn" onclick="closeModal()">×</button></div><div class="modal-body"><div class="quick" style="grid-template-columns:repeat(2,1fr)"><button onclick="openModal('taskModal')">✓<br>Task</button><button onclick="openModal('clientModal')">◉<br>Client</button><button onclick="openModal('courseModal')">◈<br>Course</button><button onclick="closeModal();showPage('knowledge')">✦<br>Knowledge</button><button onclick="closeModal();showPage('activity')">◌<br>Activity</button></div></div>`;
+ box.innerHTML=content;document.getElementById("modalOverlay").classList.add("open");
+}
+function closeModal(){document.getElementById("modalOverlay").classList.remove("open")}
+function createTask(){let title=document.getElementById("fTitle").value.trim();if(!title){toast("Task name is required");return}state.tasks.unshift({id:Date.now(),title,priority:document.getElementById("fPriority").value,status:document.getElementById("fStatus").value,due:"No due date",client:"",done:false});closeModal();toast("Task created");showPage("tasks")}
+function createClient(){let name=document.getElementById("cName").value.trim();if(!name){toast("Client name is required");return}state.clients.unshift({id:Date.now(),name,type:document.getElementById("cType").value||"General",status:document.getElementById("cStatus").value,initials:name.split(" ").map(x=>x[0]).slice(0,2).join("").toUpperCase(),last:"Just now"});closeModal();toast("Client created");showPage("clients")}
+function createCourse(){let name=document.getElementById("courseName").value.trim();if(!name){toast("Course name is required");return}state.courses.unshift({id:Date.now(),name,progress:0,status:"To Learn",category:document.getElementById("courseCat").value||"General"});closeModal();toast("Course added");showPage("learning")}
+function toggleTask(id){let t=state.tasks.find(x=>x.id===id);t.done=!t.done;t.status=t.done?"Done":"To Do";toast(t.done?"Task completed":"Task reopened");render()}
+function startTimer(id){toast("Timer started — only one timer can run system-wide.");document.querySelectorAll(".timer-btn").forEach(x=>x.textContent="Stop")}
+function deleteTask(id){if(confirm("Move this task to Trash?")){let t=state.tasks.find(x=>x.id===id);t.deleted=true;toast("Task moved to Trash");render()}}
+function globalSearch(q){if(q.length>1)showPage("search")}
+function priorityBadge(p){return `<span class="badge ${p.toLowerCase()}">${p}</span>`}
+function statusBadge(s){return `<span class="badge ${s.toLowerCase().replaceAll(" ","-")}">${s}</span>`}
+
+const pages={
+dashboard:()=>`<div class="page-head"><div><h1>Good morning 👋</h1><p>Sunday, September 27, 2026 · Your personal command center.</p></div><div class="actions"><button class="btn" onclick="openModal('quickModal')">＋ Quick Add</button><button class="btn primary" onclick="openModal('taskModal')">＋ Add Task</button></div></div>
+<div class="grid grid-4" style="margin-bottom:16px">
+${stat("Today","12","3 completed","var(--primary)")}${stat("Overdue","3","Needs attention","var(--danger)")}${stat("Upcoming","5","Next 7 days","var(--warning)")}${stat("In Progress","2","Active work","var(--success)")}
+</div>
+<div class="card pad" style="margin-bottom:16px"><div class="section-title"><h3>Quick Add</h3><span class="muted">Create without leaving Dashboard</span></div><div class="quick"><button onclick="openModal('taskModal')">✓<br><small>Task</small></button><button onclick="openModal('clientModal')">◉<br><small>Client</small></button><button onclick="openModal('courseModal')">◈<br><small>Course</small></button><button onclick="showPage('knowledge')">✦<br><small>Knowledge</small></button><button onclick="showPage('activity')">◌<br><small>Activity</small></button></div></div>
+<div class="grid grid-2">
+<div class="card pad"><div class="section-title"><h3>Today</h3><button class="btn" onclick="showPage('tasks')">View all</button></div><div class="task-list">${state.tasks.filter(t=>!t.deleted&&!t.done).slice(0,5).map(taskRow).join("")}</div></div>
+<div class="card pad"><div class="section-title"><h3>Active Timer</h3><span class="badge active">Ready</span></div><div class="timer"><div class="timer-ring"><span>25:00</span></div><div><strong>Prepare client proposal</strong><p class="muted" style="margin:6px 0">Estimated: 60 min · Actual: 25 min</p><button class="btn primary" onclick="startTimer(1)">Start Timer</button></div></div><div style="margin-top:18px"><div class="section-title"><span class="muted">Progress today</span><strong>70%</strong></div><div class="progress"><i style="width:70%"></i></div></div></div>
+<div class="card pad"><div class="section-title"><h3>Learning</h3><button class="btn" onclick="showPage('learning')">Open</button></div>${state.courses.slice(0,3).map(courseMini).join("")}</div>
+<div class="card pad"><div class="section-title"><h3>Recent Client Activity</h3><button class="btn" onclick="showPage('clients')">Clients</button></div><div class="timeline"><div class="timeline-item"><strong>Proposal sent</strong><small>Ahmed Tarek · 1 hour ago</small></div><div class="timeline-item"><strong>Creative approved</strong><small>PetHome Clinic · Yesterday</small></div><div class="timeline-item"><strong>Project started</strong><small>Sara Mohamed · Sep 25</small></div></div></div>
+</div>`,
+tasks:()=>`<div class="page-head"><div><h1>Tasks</h1><p>Create, plan, execute and track your work.</p></div><div class="actions"><button class="btn" onclick="showPage('calendar')">Calendar</button><button class="btn primary" onclick="openModal('taskModal')">＋ Add Task</button></div></div>
+<div class="card pad"><div class="tabs"><button class="tab active">All</button><button class="tab">Today</button><button class="tab">Upcoming</button><button class="tab">Completed</button></div><div class="task-list">${state.tasks.filter(t=>!t.deleted).map(taskRowFull).join("")}</div></div>`,
+calendar:()=>`<div class="page-head"><div><h1>Calendar</h1><p>Day, week and month planning for your tasks.</p></div><button class="btn primary" onclick="openModal('taskModal')">＋ Add Task</button></div><div class="card calendar"><div class="cal-head"><button class="btn">‹</button><strong>September 2026</strong><div><button class="btn">Week</button> <button class="btn">Month</button></div></div><div class="cal-grid">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x=>`<div style="padding:6px;color:var(--muted);font-size:11px;font-weight:800">${x}</div>`).join("")}${Array.from({length:30},(_,i)=>`<div class="cal-cell"><div class="num">${i+1}</div>${i===26?'<div class="event">Client meeting · 10:00</div><div class="event" style="background:var(--warning-soft);color:var(--warning)">Create content · 12:00</div>':i===27?'<div class="event">Study course · 14:00</div>':i===28?'<div class="event" style="background:var(--danger-soft);color:var(--danger)">Proposal · 10:00</div>':''}</div>`).join("")}</div></div>`,
+clients:()=>`<div class="page-head"><div><h1>Clients</h1><p>Client context, work history, agreements and notes.</p></div><button class="btn primary" onclick="openModal('clientModal')">＋ New Client</button></div><div class="card pad"><div class="actions" style="margin-bottom:15px"><label class="search" style="width:280px"><span>⌕</span><input placeholder="Search clients..."></label><button class="btn">All</button><button class="btn">Active</button><button class="btn">Paused</button></div><div class="table-wrap"><table class="table"><thead><tr><th>Client</th><th>Type of Work</th><th>Status</th><th>Last Activity</th><th></th></tr></thead><tbody>${state.clients.map(c=>`<tr><td><div class="person"><div class="avatar">${c.initials}</div><div><strong>${c.name}</strong><small>${c.id===1?"Course creator":"Business client"}</small></div></div></td><td>${c.type}</td><td>${statusBadge(c.status)}</td><td>${c.last}</td><td><button class="btn" onclick="toast('Client profile opened')">Open</button></td></tr>`).join("")}</tbody></table></div></div>`,
+learning:()=>`<div class="page-head"><div><h1>Learning</h1><p>Track courses, progress, notes and learning reminders.</p></div><button class="btn primary" onclick="openModal('courseModal')">＋ Add Course</button></div><div class="grid grid-3">${state.courses.map(c=>`<div class="card course"><div class="course-head"><div class="course-icon">◈</div><div><h4>${c.name}</h4><small>${c.category} · ${c.status}</small></div></div><div style="margin:18px 0 8px;display:flex;justify-content:space-between"><span class="muted">Progress</span><strong>${c.progress}%</strong></div><div class="progress"><i style="width:${c.progress}%"></i></div><div class="actions" style="margin-top:15px"><button class="btn" onclick="toast('Course opened')">Open</button><button class="btn" onclick="toast('Course duplicated')">Duplicate</button></div></div>`).join("")}</div><div class="card pad" style="margin-top:16px"><div class="section-title"><h3>Course Notes</h3><span class="muted">Text · Images · Files · Links</span></div><div class="notice">Learning is a tracker, not a full LMS. External course integrations remain optional.</div></div>`,
+knowledge:()=>`<div class="page-head"><div><h1>Knowledge</h1><p>Capture what you learn and make it reusable.</p></div><button class="btn primary" onclick="toast('New knowledge editor opened')">＋ New Knowledge</button></div><div class="grid grid-3">${state.knowledge.map(k=>`<div class="card knowledge"><div style="display:flex;justify-content:space-between"><div class="note-icon">✦</div>${k.pinned?'<span class="badge active">Pinned</span>':''}</div><h3 style="margin:13px 0 6px">${k.title}</h3><small class="muted">${k.category} · ${k.date}</small><p class="muted">A reusable note with rich content, links, files and practical takeaways.</p><div class="actions">${k.tags.map(t=>`<span class="badge" style="background:var(--surface-2)">${t}</span>`).join("")}</div></div>`).join("")}</div>`,
+files:()=>`<div class="page-head"><div><h1>Files</h1><p>Store, organize, relate, preview and recover your assets.</p></div><div class="actions"><button class="btn">＋ Folder</button><button class="btn primary" onclick="toast('Upload zone opened')">↑ Upload File</button></div></div><div class="grid grid-4" style="margin-bottom:16px">${["Courses","Clients","Designs","Documents"].map((x,i)=>`<div class="card folder"><div class="folder-icon">▰</div><div><strong>${x}</strong><small class="muted" style="display:block">${[12,8,25,10][i]} files</small></div></div>`).join("")}</div><div class="card pad"><div class="section-title"><h3>Recent Files</h3><button class="btn" onclick="showPage('trash')">Trash</button></div><div class="grid grid-2">${state.files.map(f=>`<div class="card file"><div class="file-row"><div class="file-icon">${f.type==="PDF"?"PDF":f.type==="Folder"?"▰":"DOC"}</div><div style="flex:1"><strong>${f.name}</strong><small class="muted" style="display:block">${f.type} · ${f.size}</small></div><button class="btn" onclick="toast('Preview opened')">Preview</button></div></div>`).join("")}</div></div>`,
+notifications:()=>`<div class="page-head"><div><h1>Notifications</h1><p>Read, manage and review important system events.</p></div><button class="btn" onclick="toast('All notifications marked as read')">Mark all as read</button></div><div class="card pad"><div class="tabs"><button class="tab active">All</button><button class="tab">Tasks</button><button class="tab">Reminders</button></div>${state.notifications.map(n=>`<div class="task-row"><div class="avatar">${n[2]==="success"?"✓":n[2]==="warning"?"!":"i"}</div><div><strong>${n[0]}</strong><div class="task-meta">${n[1]}</div></div><small class="muted">Today</small></div>`).join("")}</div>`,
+activity:()=>`<div class="page-head"><div><h1>Activity History</h1><p>Important system operations retained for 90 days.</p></div><button class="btn danger" onclick="toast('History clear requires confirmation')">Clear History</button></div><div class="card pad"><div class="timeline"><div class="timeline-item"><strong>TASK_CREATED</strong><small>Prepare client proposal · Today 10:00</small></div><div class="timeline-item"><strong>TASK_UPDATED</strong><small>Priority changed to High · Today 10:04</small></div><div class="timeline-item"><strong>CLIENT_CREATED</strong><small>Ahmed Tarek · Sep 26</small></div><div class="timeline-item"><strong>COURSE_COMPLETED</strong><small>Marketing Fundamentals · Sep 25</small></div><div class="timeline-item"><strong>FILE_UPLOADED</strong><small>Course Outline.pdf · Sep 24</small></div></div></div>`,
+trash:()=>`<div class="page-head"><div><h1>Trash</h1><p>Deleted records are recoverable for 30 days.</p></div><button class="btn danger" onclick="toast('Permanent delete requires confirmation')">Empty Trash</button></div><div class="card pad"><div class="empty"><div class="empty-icon">⌫</div><h3>Trash is currently clean</h3><p>Deleted tasks, clients, files and notes will appear here.</p></div></div>`,
+settings:()=>`<div class="page-head"><div><h1>Settings</h1><p>Control appearance, reminders, notifications and recovery.</p></div></div><div class="grid grid-2">
+<div class="card pad"><div class="section-title"><h3>Appearance</h3></div><div class="task-row"><div><strong>Theme</strong><div class="task-meta">Light / Dark / Manual selection</div></div><button class="switch ${state.theme==="dark"?"on":""}" onclick="toggleTheme()"><i></i></button></div></div>
+<div class="card pad"><div class="section-title"><h3>Notifications</h3></div><div class="task-row"><div><strong>Notifications</strong><div class="task-meta">In-system and mobile push when available</div></div><button class="switch on" onclick="this.classList.toggle('on')"><i></i></button></div><div class="task-row"><div><strong>Default reminder time</strong><div class="task-meta">Currently: TBD</div></div><button class="btn">Configure</button></div></div>
+<div class="card pad"><div class="section-title"><h3>Backup & Restore</h3></div><p class="muted">Automatic daily full-system backup. Retention policy: 30 days / final policy TBD.</p><div class="actions"><button class="btn" onclick="toast('Backup started')">Create Backup</button><button class="btn" onclick="toast('Restore flow opened')">Restore</button><button class="btn" onclick="toast('Export prepared')">Export</button></div></div>
+<div class="card pad"><div class="section-title"><h3>Data & System</h3></div><div class="notice">Single-user system. Resetting settings does not delete user data.</div><div class="actions" style="margin-top:13px"><button class="btn">Manage Categories</button><button class="btn">Manage Tags</button><button class="btn">Custom Fields</button><button class="btn danger">Reset All Settings</button></div></div>
+</div>`,
+search:()=>`<div class="page-head"><div><h1>Search</h1><p>Global search across supported modules.</p></div></div><div class="card pad"><div class="notice">Search supports Tasks, Clients, Knowledge, Courses, Files and Activities. Completed Tasks History uses its own search.</div><div style="margin-top:18px" class="empty"><div class="empty-icon">⌕</div><h3>Search results will appear here</h3><p>Try searching from the top bar.</p></div></div>`
+};
+function stat(label,value,delta,color){return `<div class="card stat"><span class="dot" style="background:${color}"></span><div class="label">${label}</div><div class="value">${value}</div><div class="delta">${delta}</div></div>`}
+function taskRow(t){return `<div class="task-row"><button class="check ${t.done?"done":""}" onclick="toggleTask(${t.id})">${t.done?"✓":""}</button><div><div class="task-title">${t.title}</div><div class="task-meta">${t.due}${t.client?" · "+t.client:""}</div></div>${priorityBadge(t.priority)}</div>`}
+function taskRowFull(t){return `<div class="task-row"><button class="check ${t.done?"done":""}" onclick="toggleTask(${t.id})">${t.done?"✓":""}</button><div><div class="task-title">${t.title}</div><div class="task-meta">${t.status} · ${t.due}${t.client?" · "+t.client:""}</div></div><div class="actions">${priorityBadge(t.priority)}<button class="btn" onclick="startTimer(${t.id})">Timer</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div></div>`}
+function courseMini(c){return `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between"><strong>${c.name}</strong><span class="muted">${c.progress}%</span></div><div class="progress" style="margin-top:8px"><i style="width:${c.progress}%"></i></div></div>`}
+document.querySelectorAll(".nav button[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+</script>
+</body>
+</html>

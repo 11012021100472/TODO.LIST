@@ -1,0 +1,6 @@
+Included source files:
+- personal_os_full_prototype.html -> index.html (copied without editing)
+- personal_productivity_system_BRD_AR.md -> docs/BRD.md (copied without editing)
+- personal_productivity_system_SRS_AR-1.md -> docs/SRS.md (copied without editing)
+
+The source files are retained verbatim. README and GitHub Pages deployment workflow are added.
