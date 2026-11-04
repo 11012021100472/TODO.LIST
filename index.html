@@ -348,7 +348,7 @@ function deleteSheetRow(si,ri){if(confirm('Move this row to Trash?')){const row=
 function deleteSheetCell(si,ri,ci){if(confirm('Clear this cell?')){state.sheets[si].rows[ri][ci]='';saveState();render()}}
 function deleteSheetCol(si,ci){if(confirm('Delete this column and its cell data?')){state.sheets[si].columns.splice(ci,1);state.sheets[si].rows.forEach(r=>r.splice(ci,1));saveState();render()}}
 function restoreTrash(i){const x=state.trash.splice(i,1)[0];if(!x)return;if(x.type==='client_bundle'){state.clients.unshift(x.item.client);Object.entries(x.item.linked).forEach(([k,v])=>state[k].unshift(...v))}else if(x.type==='sheet_row'){const sh=state.sheets.find(s=>s.id===x.item.sheetId);if(sh)sh.rows.push(x.item.row)}else state[x.type].unshift(x.item);saveState();render()}
-function renderSheets(){return `<div class="page-head"><div><h1>Sheets</h1><p>Spreadsheet-style tables. Rows, cells, columns and sheets can be managed independently.</p></div><button class="btn primary" onclick="createSheet()">＋ New Sheet</button></div>${state.sheets.map((s,i)=>`<div class="card pad" style="margin-bottom:14px"><div class="section-title"><span class="sheet-title">${escapeHtml(s.name)}</span><input aria-label="Rename sheet" value="${escapeHtml(s.name)}" onchange="state.sheets[${i}].name=this.value;saveState();render()" style="max-width:190px"><div class="actions"><button class="btn" onclick="addSheetRow(${i})">＋ Row</button><button class="btn" onclick="addSheetCol(${i})">＋ Column</button><button class="btn danger" onclick="deleteSheet(${i})">Delete Sheet</button></div></div><div class="table-wrap"><table class="table"><thead><tr>${s.columns.map((c,j)=>`<th><div>${escapeHtml(c)} <button class="tiny-btn" title="Delete column" onclick="deleteSheetCol(${i},${j})">×</button></div><input value="${escapeHtml(c)}" onchange="state.sheets[${i}].columns[${j}]=this.value;saveState()" style="width:100px"></th>`).join('')}<th>Row</th></tr></thead><tbody>${s.rows.map((r,ri)=>`<tr>${s.columns.map((c,ci)=>`<td><input value="${escapeHtml(r[ci]||'')}" onchange="state.sheets[${i}].rows[${ri}][${ci}]=this.value;saveState()" style="width:120px"><button class="tiny-btn" title="Clear cell" onclick="deleteSheetCell(${i},${ri},${ci})">×</button></td>`).join('')}<td><button class="btn danger" onclick="deleteSheetRow(${i},${ri})">Delete Row</button></td></tr>`).join('')}</tbody></table></div></div>`).join('')||'<div class="card pad"><p>No sheets yet. Create your first sheet.</p></div>'}`}
+function renderSheets(){return `<div class="page-head"><div><h1>Sheets</h1><p>Organize your information in editable spreadsheet-style tables.</p></div><button class="btn primary" onclick="createSheet()">＋ New Sheet</button></div>${state.sheets.map((s,i)=>`<section class="card pad sheet-card"><div class="sheet-toolbar"><div class="sheet-heading"><span class="sheet-title">▦</span><input class="sheet-name-input" aria-label="Sheet name" value="${escapeHtml(s.name)}" onchange="state.sheets[${i}].name=this.value.trim()||'Untitled Sheet';saveState();render()"></div><div class="actions sheet-actions"><button class="btn" onclick="addSheetRow(${i})">＋ Add Row</button><button class="btn" onclick="addSheetCol(${i})">＋ Add Column</button><button class="btn danger" onclick="deleteSheet(${i})">Delete Sheet</button></div></div><div class="sheet-scroll"><table class="sheet-table"><thead><tr>${s.columns.map((c,j)=>`<th><div class="sheet-column-head"><input aria-label="Column name" value="${escapeHtml(c)}" onchange="state.sheets[${i}].columns[${j}]=this.value;saveState()"><button class="tiny-btn" title="Delete column" onclick="deleteSheetCol(${i},${j})">×</button></div></th>`).join('')}<th class="sheet-row-head">Row actions</th></tr></thead><tbody>${s.rows.map((r,ri)=>`<tr>${s.columns.map((c,ci)=>`<td><div class="sheet-cell-wrap"><input class="sheet-cell-input" aria-label="${escapeHtml(c)} row ${ri+1}" value="${escapeHtml(r[ci]||'')}" placeholder="Enter ${escapeHtml(c.toLowerCase())}..." onchange="state.sheets[${i}].rows[${ri}][${ci}]=this.value;saveState()"><button class="tiny-btn cell-clear" title="Clear cell" onclick="deleteSheetCell(${i},${ri},${ci})">×</button></div></td>`).join('')}<td><button class="btn danger sheet-delete-row" onclick="deleteSheetRow(${i},${ri})">Delete Row</button></td></tr>`).join('')}</tbody></table></div></section>`).join('')||'<div class="card pad"><p class="muted">No sheets yet. Create your first sheet.</p></div>'}` }
 function createSheet(){const name=prompt('Sheet name:','New Sheet');if(name?.trim()){state.sheets.push({id:Date.now(),name:name.trim(),columns:['Name','Details','Status'],rows:[['','','']]});saveState();render()}}
 function addSheetRow(i){state.sheets[i].rows.push(state.sheets[i].columns.map(()=>''));saveState();render()}
 function addSheetCol(i){const n=prompt('Column name:','New column');if(n?.trim()){state.sheets[i].columns.push(n.trim());state.sheets[i].rows.forEach(r=>r.push(''));saveState();render()}}
@@ -377,134 +377,28 @@ setInterval(()=>{if(state.timer?.running){const el=document.getElementById('time
 saveState();
 </script>
 
-
-<style>
-/* Learning workspace upgrade */
-.learning-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-.learning-detail{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr);gap:16px;margin-top:16px}
-.learning-panel{padding:18px;min-width:0}
-.learning-panel h3{margin:0 0 12px}
-.learning-stat{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.learning-stat:last-child{border:0}
-.lesson-row{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
-.lesson-row:last-child{border:0}
-.lesson-row.done .lesson-name{text-decoration:line-through;color:var(--muted)}
-.lesson-check{width:19px;height:19px;accent-color:var(--success)}
-.lesson-meta{font-size:11px;color:var(--muted);margin-top:4px}
-.learning-input{width:100%;border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:10px;padding:10px;outline:none}
-.learning-input:focus{border-color:var(--primary)}
-.learning-card-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
-.learning-link{color:var(--primary);overflow-wrap:anywhere}
-.learning-attachment{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px;border:1px solid var(--border);border-radius:9px;margin-top:7px}
-.learning-section{margin-top:14px}
-.learning-small{font-size:11px;color:var(--muted)}
-@media(max-width:760px){.learning-detail{grid-template-columns:1fr}.lesson-row{grid-template-columns:22px minmax(0,1fr)}.lesson-row .lesson-actions{grid-column:2}}
-</style>
-<script>
-/* Learning v2: lesson tracking, notes, resources and course progress */
-state.selectedCourseId = state.selectedCourseId || null;
-function migrateLearningData(){
-  state.courses=(state.courses||[]).map(c=>({...c,lessons:Array.isArray(c.lessons)?c.lessons:[],watchedMinutes:Number(c.watchedMinutes)||0,notes:c.notes||'',takeaways:Array.isArray(c.takeaways)?c.takeaways:[],reviews:Array.isArray(c.reviews)?c.reviews:[],bookmarks:Array.isArray(c.bookmarks)?c.bookmarks:[],attachments:Array.isArray(c.attachments)?c.attachments:[]}));
-}
-migrateLearningData();
-function courseProgress(c){
-  const total=(c.lessons||[]).length;
-  return total?Math.round(c.lessons.filter(l=>l.done).length/total*100):Number(c.progress)||0;
-}
-function courseDuration(c){return (c.lessons||[]).reduce((n,l)=>n+(Number(l.minutes)||0),0)}
-function courseById(id){return state.courses.find(c=>String(c.id)===String(id))}
-function learningOpenUrl(id){const c=courseById(id);if(c?.url){window.open(c.url,'_blank','noopener');}else toast('Add a course URL first');}
-function learningSelect(id){state.selectedCourseId=id;saveState();render()}
-function learningBack(){state.selectedCourseId=null;saveState();render()}
-function learningAddLesson(id){
- const c=courseById(id);if(!c)return;
- const name=prompt('Lesson name:');if(!name?.trim())return;
- const mins=Number(prompt('Lesson duration in minutes (optional):','0'))||0;
- c.lessons.push({id:Date.now(),name:name.trim(),minutes:Math.max(0,mins),done:false,completedAt:null});
- logActivity('LESSON_ADDED',c.name+' · '+name.trim());saveState();render();
-}
-function learningToggleLesson(cid,lid,done){
- const c=courseById(cid),l=c?.lessons.find(x=>String(x.id)===String(lid));if(!l)return;
- l.done=!!done;l.completedAt=l.done?new Date().toISOString():null;c.progress=courseProgress(c);
- c.status=c.progress===100?'Completed':c.progress>0?'In Progress':'To Learn';
- logActivity(l.done?'LESSON_COMPLETED':'LESSON_REOPENED',c.name+' · '+l.name);saveState();render();
-}
-function learningEditLesson(cid,lid){
- const c=courseById(cid),l=c?.lessons.find(x=>String(x.id)===String(lid));if(!l)return;
- const name=prompt('Lesson name:',l.name);if(name===null)return;if(!name.trim())return;
- const mins=prompt('Duration in minutes:',String(l.minutes||0));if(mins===null)return;
- l.name=name.trim();l.minutes=Math.max(0,Number(mins)||0);saveState();render();
-}
-function learningDeleteLesson(cid,lid){const c=courseById(cid);if(!c||!confirm('Delete this lesson?'))return;c.lessons=c.lessons.filter(l=>String(l.id)!==String(lid));c.progress=courseProgress(c);saveState();render()}
-function learningSetHours(cid,value){
- const c=courseById(cid);if(!c)return;c.watchedMinutes=Math.max(0,Math.round((Number(value)||0)*60));saveState();
- const el=document.getElementById('watchedHoursLabel');if(el)el.textContent=(c.watchedMinutes/60).toFixed(1)+' hours recorded';
-}
-function learningSaveNotes(cid,value){const c=courseById(cid);if(c){c.notes=value;saveState()}}
-function learningAddListItem(cid,kind){
- const c=courseById(cid);if(!c)return;
- const label=kind==='takeaways'?'Takeaway':'Revision item';
- const v=prompt(label+':');if(!v?.trim())return;
- c[kind].push({id:Date.now(),text:v.trim(),done:false});saveState();render();
-}
-function learningToggleList(cid,kind,itemId,done){const c=courseById(cid),item=c?.[kind].find(x=>String(x.id)===String(itemId));if(item){item.done=!!done;saveState()}}
-function learningDeleteList(cid,kind,itemId){const c=courseById(cid);if(c){c[kind]=c[kind].filter(x=>String(x.id)!==String(itemId));saveState();render()}}
-function learningAddBookmark(cid){
- const c=courseById(cid);if(!c)return;
- const title=prompt('Bookmark title:');if(!title?.trim())return;
- const url=prompt('Link or video timestamp (e.g. https://... or 12:35):','');if(url===null)return;
- c.bookmarks.push({id:Date.now(),title:title.trim(),url:url.trim()});saveState();render();
-}
-function learningAddAttachment(cid,input){
- const c=courseById(cid);if(!c||!input.files?.length)return;
- const files=[...input.files];
- files.forEach(file=>{
-   if(file.size>1200000){toast(file.name+' is over 1.2 MB. Use a cloud link instead.');return;}
-   const reader=new FileReader();reader.onload=()=>{c.attachments.push({id:Date.now()+Math.random(),name:file.name,type:file.type,data:reader.result});saveState();render()};
-   reader.readAsDataURL(file);
- });
-}
-function learningRemoveAttachment(cid,id){const c=courseById(cid);if(c){c.attachments=c.attachments.filter(a=>String(a.id)!==String(id));saveState();render()}}
-function learningDownloadAttachment(cid,id){const a=courseById(cid)?.attachments.find(x=>String(x.id)===String(id));if(!a)return;const link=document.createElement('a');link.href=a.data;link.download=a.name;link.click()}
-function learningExport(cid){
- const c=courseById(cid);if(!c)return;
- const data={exportedAt:new Date().toISOString(),course:{...c,attachments:(c.attachments||[]).map(({data,...a})=>({...a,embeddedFile:true}))}};
- downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),(c.name||'course').replace(/[^a-z0-9-_]/gi,'_')+'-learning-notes.json');
-}
-function learningCourseCard(c){
- const progress=courseProgress(c),done=(c.lessons||[]).filter(l=>l.done).length,total=(c.lessons||[]).length;
- return `<div class="card course"><div class="course-head"><div class="course-icon">◈</div><div style="min-width:0"><h4>${escapeHtml(c.name)}</h4><small>${escapeHtml(c.category||'General')} · ${escapeHtml(c.status||'To Learn')}</small><div style="margin-top:7px">${clientMarkup(c.clientId)}</div></div></div>
- <div style="margin:18px 0 8px;display:flex;justify-content:space-between"><span class="muted">Progress</span><strong>${progress}%</strong></div><div class="progress"><i style="width:${progress}%"></i></div>
- <div class="learning-small" style="margin-top:7px">${done}/${total} lessons · ${(Number(c.watchedMinutes)||0)/60} watched hours</div>
- <div class="learning-card-actions"><button class="btn primary" onclick="learningSelect(${JSON.stringify(c.id)})">Manage course</button><button class="btn" onclick="learningOpenUrl(${JSON.stringify(c.id)})">Open course ↗</button><button class="btn" onclick="duplicateCourse(${JSON.stringify(c.id)})">Duplicate</button><button class="btn danger" onclick="moveToTrash('courses',${JSON.stringify(c.id)})">Delete</button></div></div>`;
-}
-function learningDetailMarkup(c){
- const id=JSON.stringify(c.id),progress=courseProgress(c),duration=courseDuration(c);
- return `<div class="page-head"><div><button class="btn" onclick="learningBack()">← All courses</button><h1 style="margin-top:12px">${escapeHtml(c.name)}</h1><p>${escapeHtml(c.category||'General')} · ${progress}% complete</p></div><div class="actions"><button class="btn" onclick="learningExport(${id})">Export notes</button>${c.url?`<button class="btn primary" onclick="learningOpenUrl(${id})">Open course ↗</button>`:''}</div></div>
- <div class="card pad"><div class="section-title"><h3>Course progress</h3><strong>${progress}%</strong></div><div class="progress" style="height:10px"><i style="width:${progress}%"></i></div><div class="grid grid-3" style="margin-top:14px"><div class="learning-stat"><span class="muted">Lessons</span><strong>${c.lessons.filter(l=>l.done).length}/${c.lessons.length}</strong></div><div class="learning-stat"><span class="muted">Course duration</span><strong>${(duration/60).toFixed(1)} hrs</strong></div><div class="learning-stat"><span class="muted">Watched</span><strong id="watchedHoursLabel">${(c.watchedMinutes/60).toFixed(1)} hours recorded</strong></div></div></div>
- <div class="learning-detail">
- <div class="card learning-panel"><div class="section-title"><h3>Lessons</h3><button class="btn primary" onclick="learningAddLesson(${id})">＋ Add lesson</button></div>
- ${c.lessons.map(l=>`<div class="lesson-row ${l.done?'done':''}"><input class="lesson-check" type="checkbox" ${l.done?'checked':''} onchange="learningToggleLesson(${id},${JSON.stringify(l.id)},this.checked)"><div><div class="lesson-name"><strong>${escapeHtml(l.name)}</strong></div><div class="lesson-meta">${Number(l.minutes)||0} min ${l.completedAt?'· Completed '+new Date(l.completedAt).toLocaleDateString():''}</div></div><div class="actions lesson-actions"><button class="btn" onclick="learningEditLesson(${id},${JSON.stringify(l.id)})">Edit</button><button class="btn danger" onclick="learningDeleteLesson(${id},${JSON.stringify(l.id)})">×</button></div></div>`).join('')||'<p class="muted">No lessons yet. Add your course lessons to track completion.</p>'}
- <div class="learning-section"><label class="field"><span><strong>Watched hours (manual)</strong></span><input class="learning-input" type="number" min="0" step=".25" value="${(c.watchedMinutes/60).toFixed(2)}" onchange="learningSetHours(${id},this.value)"></label><p class="learning-small">Hours are recorded manually. Lesson completion is tracked separately.</p></div></div>
- <div class="card learning-panel"><h3>Bookmarks & timestamps</h3><button class="btn" onclick="learningAddBookmark(${id})">＋ Add bookmark</button>${c.bookmarks.map(b=>`<div class="learning-attachment"><div><strong>${escapeHtml(b.title)}</strong><div class="learning-small">${b.url.startsWith('http')?`<a class="learning-link" href="${escapeHtml(b.url)}" target="_blank" rel="noopener">${escapeHtml(b.url)}</a>`:escapeHtml(b.url||'No timestamp')}</div></div><button class="btn danger" onclick="learningDeleteList(${id},'bookmarks',${JSON.stringify(b.id)})">×</button></div>`).join('')||'<p class="learning-small">Save useful links or timestamps like 12:35.</p>'}
- <div class="learning-section"><h3>Takeaways</h3><button class="btn" onclick="learningAddListItem(${id},'takeaways')">＋ Add takeaway</button>${learningListMarkup(c,'takeaways')}</div>
- <div class="learning-section"><h3>Revision list</h3><button class="btn" onclick="learningAddListItem(${id},'reviews')">＋ Add revision item</button>${learningListMarkup(c,'reviews')}</div></div></div>
- <div class="grid grid-2" style="margin-top:16px">
- <div class="card learning-panel"><h3>Course notes</h3><textarea class="learning-input" rows="10" placeholder="Write your notes, explanations and ideas..." oninput="learningSaveNotes(${id},this.value)">${escapeHtml(c.notes)}</textarea><p class="learning-small">Notes save automatically in this browser.</p></div>
- <div class="card learning-panel"><div class="section-title"><h3>Files & screenshots</h3><label class="btn">＋ Attach files<input type="file" hidden multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx" onchange="learningAddAttachment(${id},this)"></label></div><p class="learning-small">Small files (up to 1.2 MB each) are stored in this browser. For larger files, add a cloud link under Bookmarks.</p>${c.attachments.map(a=>`<div class="learning-attachment"><div style="min-width:0"><strong>${escapeHtml(a.name)}</strong><div class="learning-small">${escapeHtml(a.type||'File')}</div></div><div class="actions"><button class="btn" onclick="learningDownloadAttachment(${id},${JSON.stringify(a.id)})">Download</button><button class="btn danger" onclick="learningRemoveAttachment(${id},${JSON.stringify(a.id)})">×</button></div></div>`).join('')||'<p class="learning-small">No attachments yet.</p>'}</div></div>`;
-}
-function learningListMarkup(c,kind){return c[kind].map(x=>`<div class="task-row"><input type="checkbox" ${x.done?'checked':''} onchange="learningToggleList(${JSON.stringify(c.id)},'${kind}',${JSON.stringify(x.id)},this.checked)"><div style="flex:1"><span style="${x.done?'text-decoration:line-through;color:var(--muted)':''}">${escapeHtml(x.text)}</span></div><button class="btn danger" onclick="learningDeleteList(${JSON.stringify(c.id)},'${kind}',${JSON.stringify(x.id)})">×</button></div>`).join('')||'<p class="learning-small">Nothing added yet.</p>'}
-pages.learning=()=>{
- migrateLearningData();
- const selected=courseById(state.selectedCourseId);
- if(selected)return learningDetailMarkup(selected);
- return `<div class="page-head"><div><h1>Learning</h1><p>Track courses, lessons, watched hours, notes and resources.</p></div><button class="btn primary" onclick="openModal('courseModal')">＋ Add Course</button></div>
- <div class="notice" style="margin-bottom:16px">Progress is calculated from completed lessons once you add lessons. Watched hours are recorded manually; external course players do not automatically report watch time here.</div>
- <div class="grid grid-3">${state.courses.map(learningCourseCard).join('')||'<div class="card pad"><p class="muted">No courses yet. Add your first course to get started.</p></div>'}</div>`;
-};
-const _learningSaveState=saveState;
-saveState=function(){state.courses=(state.courses||[]).map(c=>({...c,progress:courseProgress(c)}));_learningSaveState();};
-</script>
-
 </body>
 </html>
+
+<style>
+/* Sheets: readable, responsive spreadsheet controls */
+.sheet-card{margin-bottom:16px;min-width:0;overflow:hidden}
+.sheet-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.sheet-heading{display:flex;align-items:center;gap:10px;min-width:min(100%,260px);flex:1}
+.sheet-title{display:inline-grid;place-items:center;width:42px;height:42px;min-width:42px;padding:0;border-radius:12px;background:var(--primary-soft);border:1px solid var(--primary);color:var(--primary);font-size:20px}
+.sheet-name-input{width:min(100%,320px)!important;min-width:0!important;padding:11px 13px!important;border:1px solid var(--border)!important;border-radius:10px!important;background:var(--surface-2)!important;color:var(--text)!important;font-size:16px!important;font-weight:800!important;outline:none!important}
+.sheet-name-input:focus,.sheet-column-head input:focus,.sheet-cell-input:focus{border-color:var(--primary)!important;box-shadow:0 0 0 3px var(--primary-soft)!important}
+.sheet-scroll{width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px}
+.sheet-table{width:100%;min-width:720px;border-collapse:separate;border-spacing:0;background:var(--surface)}
+.sheet-table th,.sheet-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;text-align:left}
+.sheet-table th{background:var(--surface-2);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.045em}
+.sheet-table tbody tr:last-child td{border-bottom:0}
+.sheet-table tbody tr:hover{background:color-mix(in srgb,var(--primary-soft) 22%,var(--surface))}
+.sheet-column-head,.sheet-cell-wrap{display:flex;align-items:center;gap:7px;min-width:150px}
+.sheet-column-head input,.sheet-cell-input{display:block;width:100%!important;min-width:130px;min-height:40px;padding:9px 11px!important;border:1px solid var(--border)!important;border-radius:8px!important;background:var(--bg)!important;color:var(--text)!important;font-size:13px!important;font-weight:600;outline:none!important;box-shadow:none!important}
+.sheet-column-head input{background:var(--surface)!important;font-weight:750}
+.sheet-cell-input::placeholder{color:var(--muted)!important;opacity:1}
+.sheet-cell-input:focus,.sheet-column-head input:focus{background:var(--surface)!important}
+.sheet-row-head{min-width:125px}.sheet-delete-row{white-space:nowrap}.tiny-btn{flex:0 0 auto;color:var(--muted);border:1px solid var(--border);background:var(--surface-2);font-size:14px;min-width:27px;min-height:27px;cursor:pointer}.tiny-btn:hover{color:var(--danger);border-color:var(--danger)}
+@media(max-width:760px){.sheet-toolbar{align-items:stretch}.sheet-heading{flex:1 1 100%}.sheet-name-input{flex:1;width:100%!important}.sheet-actions{width:100%}.sheet-actions .btn{flex:1;justify-content:center;padding:9px 8px;font-size:12px}.sheet-card{padding:13px!important}.sheet-table{min-width:680px}.sheet-table th,.sheet-table td{padding:8px}.sheet-cell-input,.sheet-column-head input{min-height:42px}}
+</style>
